@@ -5,13 +5,13 @@ import slidingwindow as sw
 
 import cv2
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import time
 
 from tf_pose import common
 from tf_pose.common import CocoPart
 from tf_pose.tensblur.smoother import Smoother
-import tensorflow.contrib.tensorrt as trt
+from tensorflow.python.compiler.tensorrt import trt
 
 try:
     from tf_pose.pafprocess import pafprocess
@@ -19,6 +19,10 @@ except ModuleNotFoundError as e:
     print(e)
     print('you need to build c++ library for pafprocess. See : https://github.com/ildoonet/tf-pose-estimation/tree/master/tf_pose/pafprocess')
     exit(-1)
+
+tf.disable_v2_behavior() 
+
+tf.compat.v1.disable_eager_execution()
 
 logger = logging.getLogger('TfPoseEstimator')
 logger.handlers.clear()
@@ -308,8 +312,8 @@ class TfPoseEstimator:
 
         # load graph
         logger.info('loading graph from %s(default size=%dx%d)' % (graph_path, target_size[0], target_size[1]))
-        with tf.gfile.GFile(graph_path, 'rb') as f:
-            graph_def = tf.GraphDef()
+        with tf.io.gfile.GFile(graph_path, 'rb') as f:
+            graph_def = tf.compat.v1.GraphDef()
             graph_def.ParseFromString(f.read())
 
         if trt_bool is True:
@@ -327,11 +331,11 @@ class TfPoseEstimator:
                 use_calibration=True,
             )
 
-        self.graph = tf.get_default_graph()
+        self.graph = tf.compat.v1.get_default_graph()
         tf.import_graph_def(graph_def, name='TfPoseEstimator')
-        self.persistent_sess = tf.Session(graph=self.graph, config=tf_config)
+        self.persistent_sess = tf.compat.v1.Session(graph=self.graph, config=tf_config)
 
-        for ts in [n.name for n in tf.get_default_graph().as_graph_def().node]:
+        for ts in [n.name for n in tf.compat.v1.get_default_graph().as_graph_def().node]:
             print(ts)
 
         self.tensor_image = self.graph.get_tensor_by_name('TfPoseEstimator/image:0')
@@ -356,7 +360,7 @@ class TfPoseEstimator:
         self.heatMat = self.pafMat = None
 
         # warm-up
-        self.persistent_sess.run(tf.variables_initializer(
+        self.persistent_sess.run(tf.compat.v1.variables_initializer(
             [v for v in tf.global_variables() if
              v.name.split(':')[0] in [x.decode('utf-8') for x in
                                       self.persistent_sess.run(tf.report_uninitialized_variables())]
@@ -579,3 +583,4 @@ if __name__ == '__main__':
     dt = time.time() - t;
     t = time.time()
     logger.info('elapsed #humans=%d time=%.8f' % (len(humans), dt))
+

@@ -23,9 +23,7 @@ import copy
 import os
 
 import tensorflow as tf
-
-
-slim = tf.contrib.slim
+import tf_slim as slim
 
 
 @slim.add_arg_scope
@@ -341,7 +339,7 @@ def mobilenet(inputs,
 
     net = tf.identity(net, name='embedding')
 
-    with tf.variable_scope('Logits'):
+    with tf.compat.v1.variable_scope('Logits'):
       net = global_pool(net)
       end_points['global_pool'] = net
       if not num_classes:
@@ -439,3 +437,4 @@ def training_scope(is_training=True,
                      weights_regularizer=slim.l2_regularizer(weight_decay)), \
       slim.arg_scope([slim.separable_conv2d], weights_regularizer=None) as s:
     return s
+

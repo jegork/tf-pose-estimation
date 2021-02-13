@@ -30,7 +30,7 @@ import tensorflow as tf
 from tf_pose.mobilenet import conv_blocks as ops
 from tf_pose.mobilenet import mobilenet as lib
 
-slim = tf.contrib.slim
+import tf_slim as slim
 op = lib.op
 
 expand_input = ops.expand_input_by_factor
@@ -204,3 +204,4 @@ def training_scope(**kwargs):
 
 
 __all__ = ['training_scope', 'mobilenet_base', 'mobilenet', 'V2_DEF']
+

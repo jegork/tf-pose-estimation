@@ -5,7 +5,7 @@ import sys
 import abc
 import numpy as np
 import tensorflow as tf
-import tensorflow.contrib.slim as slim
+import tf_slim as slim
 
 from tf_pose.common import to_str
 from tf_pose import common
@@ -13,11 +13,11 @@ from tf_pose import common
 DEFAULT_PADDING = 'SAME'
 
 
-_init_xavier = tf.contrib.layers.xavier_initializer()
-_init_norm = tf.truncated_normal_initializer(stddev=0.01)
+_init_xavier = tf.keras.initializers.glorot_normal()
+_init_norm = tf.compat.v1.truncated_normal_initializer(stddev=0.01)
 _init_zero = slim.init_ops.zeros_initializer()
-_l2_regularizer_00004 = tf.contrib.layers.l2_regularizer(0.00004)
-_l2_regularizer_convb = tf.contrib.layers.l2_regularizer(common.regularizer_conv)
+_l2_regularizer_00004 = tf.keras.regularizers.L2(0.00004)
+_l2_regularizer_convb = tf.keras.regularizers.L2(common.regularizer_conv)
 
 
 def layer(op):
@@ -80,7 +80,7 @@ class BaseNetwork(object):
             if isinstance(data_dict[op_name], np.ndarray):
                 if 'RMSProp' in op_name:
                     continue
-                with tf.variable_scope('', reuse=True):
+                with tf.compat.v1.variable_scope('', reuse=True):
                     var = tf.get_variable(op_name.replace(':0', ''))
                     try:
                         session.run(var.assign(data_dict[op_name]))
@@ -94,7 +94,7 @@ class BaseNetwork(object):
                 #     print(op_name, 'skipped')
                 #     continue
                 # print(op_name, 'restored')
-                with tf.variable_scope(op_name, reuse=True):
+                with tf.compat.v1.variable_scope(op_name, reuse=True):
                     for param_name, data in param_dict.items():
                         try:
                             var = tf.get_variable(to_str(param_name))
@@ -250,7 +250,7 @@ class BaseNetwork(object):
         assert c_o % group == 0
         # Convolution for a given input and kernel
         convolve = lambda i, k: tf.nn.conv2d(i, k, [1, s_h, s_w, 1], padding=padding)
-        with tf.variable_scope(name) as scope:
+        with tf.compat.v1.variable_scope(name) as scope:
             kernel = self.make_var('weights', shape=[k_h, k_w, c_i / group, c_o], trainable=self.trainable & trainable)
             if group == 1:
                 # This is the common-case. Convolve the input without any further complications.
@@ -313,7 +313,7 @@ class BaseNetwork(object):
 
     @layer
     def fc(self, input, num_out, name, relu=True):
-        with tf.variable_scope(name) as scope:
+        with tf.compat.v1.variable_scope(name) as scope:
             input_shape = input.get_shape()
             if input_shape.ndims == 4:
                 # The input is spatial. Vectorize it first.
@@ -345,7 +345,7 @@ class BaseNetwork(object):
     @layer
     def batch_normalization(self, input, name, scale_offset=True, relu=False):
         # NOTE: Currently, only inference is supported
-        with tf.variable_scope(name) as scope:
+        with tf.compat.v1.variable_scope(name) as scope:
             shape = [input.get_shape()[-1]]
             if scale_offset:
                 scale = self.make_var('scale', shape=shape)
@@ -381,7 +381,7 @@ class BaseNetwork(object):
         kernel_initializer = tf.contrib.layers.variance_scaling_initializer()
         bias_initializer = tf.constant_initializer(value=0.0)
 
-        with tf.variable_scope(name):
+        with tf.compat.v1.variable_scope(name):
             channel = input_feature.get_shape()[-1]
             # Global average pooling
             squeeze = tf.reduce_mean(input_feature, axis=[1, 2], keepdims=True)
@@ -399,3 +399,4 @@ class BaseNetwork(object):
                                          name='recover_fc')
             scale = input_feature * excitation
         return scale
+
