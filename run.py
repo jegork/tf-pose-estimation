@@ -29,6 +29,8 @@ if __name__ == '__main__':
                              'default=0x0, Recommends : 432x368 or 656x368 or 1312x736 ')
     parser.add_argument('--resize-out-ratio', type=float, default=4.0,
                         help='if provided, resize heatmaps before they are post-processed. default=1.0')
+    parser.add_argument('--name', type=str, default=None,
+                        help='if provided, sets the name for the output image; otherwise, image is not saved')
 
     args = parser.parse_args()
 
@@ -86,7 +88,10 @@ if __name__ == '__main__':
         plt.imshow(tmp2_even, cmap=plt.cm.gray, alpha=0.5)
         plt.colorbar()
         plt.show()
+        if args.name is not None:
+            plt.savefig(args.name + '.png')
     except Exception as e:
         logger.warning('matplitlib error, %s' % e)
         cv2.imshow('result', image)
         cv2.waitKey()
+
