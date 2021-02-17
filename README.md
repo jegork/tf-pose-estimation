@@ -2,50 +2,22 @@
 
 'Openpose', human pose estimation algorithm, have been implemented using Tensorflow. It also provides several variants that have some changes to the network structure for **real-time processing on the CPU or low-power embedded devices.**
 
-**You can even run this on your macbook with a descent FPS!**
 
-Original Repo(Caffe) : https://github.com/CMU-Perceptual-Computing-Lab/openpose
+**THIS IS A FORK OF https://github.com/ildoonet/tf-pose-estimation**
 
-| CMU's Original Model</br> on Macbook Pro 15" | Mobilenet-thin </br>on Macbook Pro 15" | Mobilenet-thin</br>on Jetson TX2 |
-|:---------|:--------------------|:----------------|
-| ![cmu-model](/etcs/openpose_macbook_cmu.gif)     | ![mb-model-macbook](/etcs/openpose_macbook_mobilenet3.gif) | ![mb-model-tx2](/etcs/openpose_tx2_mobilenet3.gif) |
-| **~0.6 FPS** | **~4.2 FPS** @ 368x368 | **~10 FPS** @ 368x368 |
-| 2.8GHz Quad-core i7 | 2.8GHz Quad-core i7 | Jetson TX2 Embedded Board | 
+## Important Updates of this fork
 
-Implemented features are listed here : [features](./etcs/feature.md)
-
-## Important Updates
-
-- 2019.3.12 Add new models using mobilenet-v2 architecture. See : [experiments.md](./etcs/experiments.md)
-- 2018.5.21 Post-processing part is implemented in c++. It is required compiling the part. See: https://github.com/ildoonet/tf-pose-estimation/tree/master/src/pafprocess
-- 2018.2.7 Arguments in run.py script changed. Support dynamic input size.
-
-## Install
-
-### Dependencies
-
-You need dependencies below.
-
-- python3
-- tensorflow 1.4.1+
-- opencv3, protobuf, python3-tk
-- slidingwindow
-  - https://github.com/adamrehn/slidingwindow
-  - I copied from the above git repo to modify few things.
-
-### Pre-Install Jetson case
-
-```bash
-$ sudo apt-get install libllvm-7-ocaml-dev libllvm7 llvm-7 llvm-7-dev llvm-7-doc llvm-7-examples llvm-7-runtime
-$ export LLVM_CONFIG=/usr/bin/llvm-config-7 
-```
+- Add get_points.py that returns the list of OpenPose points in the format of (x, y, color, score) [17.02.2021]
+- Add create_video.py that renders and saves a video rendered with OpenPose [17.02.2021]
+- Add --name parameter to run.py, which gives the name to the saved output image; image not saved if null [13.02.2021]
+- Add compatibility with the latest version of TensorFlow [13.02.2021]
 
 ### Install
 
 Clone the repo and install 3rd-party libraries.
 
 ```bash
-$ git clone https://www.github.com/ildoonet/tf-pose-estimation
+$ git clone https://www.github.com/jegork/tf-pose-estimation
 $ cd tf-pose-estimation
 $ pip3 install -r requirements.txt
 ```
@@ -54,16 +26,6 @@ Build c++ library for post processing. See : https://github.com/ildoonet/tf-pose
 ```
 $ cd tf_pose/pafprocess
 $ swig -python -c++ pafprocess.i && python3 setup.py build_ext --inplace
-```
-
-### Package Install
-
-Alternatively, you can install this repo as a shared package using pip.
-
-```bash
-$ git clone https://www.github.com/ildoonet/tf-pose-estimation
-$ cd tf-pose-estimation
-$ python setup.py install  # Or, `pip install -e .`
 ```
 
 ## Models & Performances
@@ -84,6 +46,13 @@ CMU's model graphs are too large for git, so I uploaded them on an external clou
 ```
 $ cd models/graph/cmu
 $ bash download.sh
+```
+
+### Install TF-slim and OpenCV
+
+```
+pip install git+https://github.com/google-research/tf-slim
+pip install opencv-python
 ```
 
 ## Demo
