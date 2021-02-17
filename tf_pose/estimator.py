@@ -397,7 +397,7 @@ class TfPoseEstimator:
         pass
 
     def get_flops(self):
-        flops = tf.profiler.profile(self.graph, options=tf.profiler.ProfileOptionBuilder.float_operation())
+        flops = tf.profiler.profile(self.grwaph, options=tf.profiler.ProfileOptionBuilder.float_operation())
         return flops.total_float_ops
 
     @staticmethod
@@ -414,6 +414,8 @@ class TfPoseEstimator:
             npimg = np.copy(npimg)
         image_h, image_w = npimg.shape[:2]
         centers = {}
+        if humans is None:
+            raise Exception('Humans is empty!')
         for human in humans:
             # draw point
             for i in range(common.CocoPart.Background.value):
@@ -434,6 +436,26 @@ class TfPoseEstimator:
                 cv2.line(npimg, centers[pair[0]], centers[pair[1]], common.CocoColors[pair_order], 3)
 
         return npimg
+    
+    @staticmethod
+    def get_points(npimg, humans):
+        image_h, image_w = npimg.shape[:2]
+        centers = [None] * len(humans)
+        if humans is None:
+            raise Exception('Humans is empty!')
+        for id_human, human in enumerate(humans):
+            centers[id_human] = {}
+            # draw point
+            print(centers)
+            for i in range(common.CocoPart.Background.value):
+                if i not in human.body_parts.keys():
+                    continue
+
+                body_part = human.body_parts[i]
+                center = (int(body_part.x * image_w + 0.5), int(body_part.y * image_h + 0.5))
+                centers[id_human][str(common.CocoColors[i])] = center
+                
+        return centers
 
     def _get_scaled_img(self, npimg, scale):
         get_base_scale = lambda s, w, h: max(self.target_size[0] / float(h), self.target_size[1] / float(w)) * s
@@ -583,4 +605,3 @@ if __name__ == '__main__':
     dt = time.time() - t;
     t = time.time()
     logger.info('elapsed #humans=%d time=%.8f' % (len(humans), dt))
-
