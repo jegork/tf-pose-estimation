@@ -42,7 +42,6 @@ if __name__ == '__main__':
     e = TfPoseEstimator(get_graph_path(args.model), target_size=(int(width), int(height)))
 
 
-    val = False
     if cap.isOpened() is False:
         print("Error opening video stream or file")
     while cap.isOpened():
@@ -59,12 +58,6 @@ if __name__ == '__main__':
         cv2.putText(image, "FPS: %f" % (1.0 / (time.time() - fps_time)), (10, 10),  cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         out.write(image)
 
-        if val == False:
-            logger.debug(humans)
-            plt.imshow(image)
-            plt.savefig('img.png')
-            val = True
-            
         fps_time = time.time()
             
 logger.debug('finished+')
