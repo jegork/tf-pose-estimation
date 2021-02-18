@@ -454,8 +454,8 @@ class TfPoseEstimator:
                     continue
 
                 body_part = human.body_parts[i]
-                center = (int(body_part.x * image_w + 0.5), int(body_part.y * image_h + 0.5), str(common.CocoColors[i]), body_part.score)
-                # create a tuple of (x, y, color, score)
+                center = (int(body_part.x * image_w + 0.5), int(body_part.y * image_h + 0.5), body_part.get_part_name(), body_part.score)
+                # create a tuple of (x, y, name, score)
 
                 points[id_human].append(center)
                 
