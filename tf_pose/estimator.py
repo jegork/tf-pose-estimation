@@ -441,25 +441,26 @@ class TfPoseEstimator:
     @staticmethod
     def get_points(npimg, humans):
         image_h, image_w = npimg.shape[:2]
-        points = [None] * len(humans)
+        points = []
 
         if humans is None:
             raise Exception('Humans is empty!')
 
         for id_human, human in enumerate(humans):
-            points[id_human] = []
             # draw point
             for i in range(common.CocoPart.Background.value):
                 if i not in human.body_parts.keys():
                     continue
 
                 body_part = human.body_parts[i]
-                center = (int(body_part.x * image_w + 0.5), int(body_part.y * image_h + 0.5), body_part.get_part_name(), body_part.score)
+                body_part_name = str(body_part.get_part_name()).split('.')[1]
+                center = [id_human, int(body_part.x * image_w + 0.5), int(body_part.y * image_h + 0.5), body_part_name, body_part.score]
                 # create a tuple of (x, y, name, score)
-
-                points[id_human].append(center)
-                
-        return points
+                points.append(center)
+        
+        _points = np.array(points)
+        
+        return _points
 
     def _get_scaled_img(self, npimg, scale):
         get_base_scale = lambda s, w, h: max(self.target_size[0] / float(h), self.target_size[1] / float(w)) * s
